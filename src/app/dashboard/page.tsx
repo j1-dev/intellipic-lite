@@ -15,22 +15,26 @@ import {
 } from '@/components/ui/select';
 import { supabase } from '@/utils/supabaseClient';
 
-type Image = {
+interface ImageGeneration {
   id: string;
   url: string;
   created_at: string;
   prompt: string;
-};
+  status: 'starting' | 'processing' | 'completed' | 'failed';
+  error?: string;
+}
 
 export default function Dashboard() {
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const [prompt, setPrompt] = useState('');
   const [gender, setGender] = useState('male');
   const [generating, setGenerating] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [images, setImages] = useState<Image[]>([]);
+  const [images, setImages] = useState<ImageGeneration[]>([]);
   const [error, setError] = useState('');
+  const [currentGeneration, setCurrentGeneration] =
+    useState<ImageGeneration | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch images when component mounts
@@ -43,192 +47,291 @@ export default function Dashboard() {
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
-      console.log(data, error);
 
       if (error) {
         console.error('Error fetching images:', error);
+        setError('Failed to load your images');
       } else {
         setImages(data || []);
       }
     };
 
     fetchImages();
-  }, [user?.id]);
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        // 5MB limit
-        setError('Image must be less than 5MB');
-        return;
+    // Set up polling for status updates if there's an active generation
+    const pollInterval = setInterval(async () => {
+      if (
+        currentGeneration &&
+        currentGeneration.status !== 'completed' &&
+        currentGeneration.status !== 'failed'
+      ) {
+        // First check the prediction status
+        const { data: predictionData, error: predictionError } = await supabase
+          .from('predictions')
+          .select('status, output_urls')
+          .eq('id', currentGeneration.id)
+          .single();
+
+        if (predictionError) {
+          console.error('Error polling prediction:', predictionError);
+        } else if (predictionData) {
+          // Update the current generation with new status
+          setCurrentGeneration((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  status: predictionData.status,
+                  url: predictionData.output_urls?.[0] || prev.url,
+                }
+              : null
+          );
+
+          // If the prediction is complete, refresh the images
+          if (
+            predictionData.status === 'completed' ||
+            predictionData.status === 'failed'
+          ) {
+            fetchImages();
+          }
+        }
       }
-      setSelectedImage(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      setError('');
-    }
-  };
+    }, 1000);
 
-  const handleGenerateImage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!prompt.trim() || !selectedImage) {
-      setError('Please provide both a prompt and an image');
-      return;
-    }
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [user?.id, currentGeneration]);
 
-    if (!session?.access_token) {
-      setError('Please log in to generate images');
-      return;
-    }
-
-    setError('');
-    setGenerating(true);
-
+  const handleGenerateImage = async () => {
     try {
+      setGenerating(true);
+      setError('');
+
+      if (!selectedImage) {
+        throw new Error('Please select an image first');
+      }
+
+      // Create a FormData object
       const formData = new FormData();
+      formData.append('image', selectedImage); // Changed from 'file' to 'image' to match API expectation
       formData.append('prompt', prompt);
-      formData.append('image', selectedImage);
       formData.append('gender', gender);
+
+      // Get the current session from Supabase
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      console.log('Session:', session); // Debug log
+      if (!session?.access_token) {
+        throw new Error('Not authenticated');
+      }
+
+      console.log('Using token:', session.access_token); // Debug log
+      const headers = new Headers();
+      headers.append('Authorization', `Bearer ${session.access_token}`);
+      // Don't set Content-Type header, let the browser set it with the correct boundary for FormData
 
       const response = await fetch('/api/generate-image', {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers,
         body: formData,
+        // Important: include credentials to ensure cookies and auth headers are sent
+        credentials: 'same-origin',
       });
 
       if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Failed to generate image');
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to generate image');
       }
 
-      // After successful generation, refresh images list
-      const { data: newImages } = await supabase
-        .from('images')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+      const data = await response.json();
 
-      setImages(newImages || []);
+      // Initialize current generation tracking
+      const { id: predictionId, status } = data;
+      setCurrentGeneration({
+        id: predictionId,
+        status: status || 'starting',
+        prompt,
+        created_at: new Date().toISOString(),
+        url: '',
+      });
+    } catch (err: Error | unknown) {
+      const error =
+        err instanceof Error ? err : new Error('An unknown error occurred');
+      setError(error.message);
+      console.error('Error generating image:', err);
+    } finally {
+      setGenerating(false);
+      // Clear the form
       setPrompt('');
       setSelectedImage(null);
       setPreviewUrl(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
-    } catch (error) {
-      setError(
-        error instanceof Error ? error.message : 'Failed to generate image'
-      );
-    } finally {
-      setGenerating(false);
     }
   };
 
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <Card className="p-6 mb-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">
-              Welcome back{user?.email ? `, ${user.email}` : ''}
-            </h1>
-            <p className="text-gray-500 mt-1">
-              Upload a photo and create amazing AI avatars
-            </p>
-          </div>
-          <Button variant="outline" className="mt-4 md:mt-0">
-            View History
-          </Button>
-        </div>
+  // Status display component
+  const StatusDisplay = ({ status }: { status: string }) => {
+    const getStatusColor = () => {
+      switch (status) {
+        case 'completed':
+          return 'text-green-500';
+        case 'failed':
+          return 'text-red-500';
+        default:
+          return 'text-blue-500';
+      }
+    };
 
-        <form onSubmit={handleGenerateImage} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Upload Your Photo
-            </label>
-            <Input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageSelect}
-              disabled={generating}
-            />
-            {previewUrl && (
-              <div className="mt-2 relative w-32 h-32">
+    const getStatusText = () => {
+      switch (status) {
+        case 'starting':
+          return 'Starting generation...';
+        case 'processing':
+          return 'Generating your image...';
+        case 'completed':
+          return 'Generation complete!';
+        case 'failed':
+          return 'Generation failed';
+        default:
+          return 'Processing...';
+      }
+    };
+
+    return (
+      <div className={`flex items-center gap-2 ${getStatusColor()}`}>
+        {status !== 'completed' && status !== 'failed' && (
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+        )}
+        <span>{getStatusText()}</span>
+      </div>
+    );
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Image Generation Form */}
+        <Card className="p-6">
+          <h2 className="text-2xl font-bold mb-4">Generate New Image</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Reference Image
+              </label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    setSelectedImage(file);
+                    setPreviewUrl(URL.createObjectURL(file));
+                  }
+                }}
+                ref={fileInputRef}
+              />
+              {previewUrl && (
+                <div className="mt-2 relative w-32 h-32">
+                  <Image
+                    src={previewUrl}
+                    alt="Preview"
+                    fill
+                    className="object-cover rounded-lg"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Prompt</label>
+              <Input
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Enter your prompt..."
+                disabled={generating}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Gender</label>
+              <Select
+                value={gender}
+                onValueChange={setGender}
+                disabled={generating}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">Male</SelectItem>
+                  <SelectItem value="female">Female</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {error && <div className="text-red-500 text-sm">{error}</div>}
+
+            <Button
+              onClick={handleGenerateImage}
+              disabled={!selectedImage || !prompt || generating}
+              className="w-full">
+              {generating ? 'Generating...' : 'Generate Image'}
+            </Button>
+          </div>
+        </Card>
+
+        {/* Current Generation Status */}
+        {currentGeneration ? (
+          <Card className="p-6">
+            <h3 className="text-xl font-semibold mb-4">Current Generation</h3>
+            <div className="space-y-4">
+              <StatusDisplay status={currentGeneration.status} />
+              {currentGeneration.url && (
+                <div className="relative w-full h-64">
+                  <Image
+                    src={currentGeneration.url}
+                    alt={currentGeneration.prompt}
+                    fill
+                    className="object-cover rounded-lg"
+                  />
+                </div>
+              )}
+              <p className="text-sm text-gray-600">
+                Prompt: {currentGeneration.prompt}
+              </p>
+            </div>
+          </Card>
+        ) : (
+          <Card className="p-6 flex items-center justify-center text-gray-500">
+            <p>No active generation</p>
+          </Card>
+        )}
+      </div>
+
+      {/* Generated Images Gallery */}
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4">Your Generated Images</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {images.map((image) => (
+            <Card key={image.id} className="p-4">
+              <div className="relative w-full h-64 mb-4">
                 <Image
-                  src={previewUrl}
-                  alt="Preview"
+                  src={image.url}
+                  alt={image.prompt}
                   fill
                   className="object-cover rounded-lg"
                 />
               </div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Select Your Gender
-            </label>
-            <Select
-              value={gender}
-              onValueChange={setGender}
-              disabled={generating}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Enter Scene Description
-            </label>
-            <Input
-              type="text"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe the scene (e.g., astronaut in space, warrior in battle)"
-              disabled={generating}
-            />
-          </div>
-
-          {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={generating || !selectedImage}>
-            {generating ? 'Generating Avatar...' : 'Generate Avatar'}
-          </Button>
-        </form>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {images.map((image) => (
-          <Card key={image.id} className="overflow-hidden">
-            <div className="relative aspect-square">
-              <Image
-                src={image.url}
-                alt={image.prompt}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="p-4">
               <p className="text-sm text-gray-600 truncate">{image.prompt}</p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-xs text-gray-400">
                 {new Date(image.created_at).toLocaleDateString()}
               </p>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );

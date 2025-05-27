@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { replicate } from '@/utils/replicateClient';
+import Replicate from 'replicate';
+
+export const replicate = new Replicate({
+  auth: process.env.REPLICATE_API_TOKEN!,
+});
 
 // Initialize Supabase client with service role for server-side operations
 const supabase = createClient(
@@ -24,10 +28,22 @@ export async function POST(request: NextRequest) {
 
     // Get the JWT token from the Authorization header
     const authHeader = request.headers.get('Authorization');
+    console.log(
+      'Request headers:',
+      Object.fromEntries(request.headers.entries())
+    ); // Debug all headers
+    console.log('Authorization header:', authHeader);
+
     if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.log('Missing or invalid Authorization header');
+      return NextResponse.json(
+        { error: 'Unauthorized - No Bearer token' },
+        { status: 401 }
+      );
     }
     const token = authHeader.split(' ')[1];
+    console.log('Extracted token:', token.substring(0, 20) + '...');
+    console.log('Extracted token:', token);
 
     // Verify the JWT token and get the user
     const {
@@ -37,6 +53,7 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+    console.log('Authenticated user:', user.id);
 
     if (!prompt || !imageFile) {
       return NextResponse.json(
@@ -66,6 +83,7 @@ export async function POST(request: NextRequest) {
     if (predictionError) {
       throw predictionError;
     }
+    console.log('Created prediction record:', predictionRecord);
 
     // Start the prediction with Replicate
     console.log(
@@ -73,9 +91,9 @@ export async function POST(request: NextRequest) {
         predictionRecord.id
       }`
     );
+
     const prediction = await replicate.predictions.create({
-      version:
-        'easel/ai-avatars',
+      version: 'easel/ai-avatars',
       input: {
         face_image: imageDataUrl,
         user_gender: gender,
@@ -87,6 +105,8 @@ export async function POST(request: NextRequest) {
       }`,
       webhook_events_filter: ['completed'],
     });
+
+    console.log('Replicate prediction started:', prediction);
 
     // Update the prediction record with Replicate's prediction ID
     const { error: updateError } = await supabase
@@ -100,6 +120,7 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       throw updateError;
     }
+    console.log('Updated prediction record with Replicate ID:', prediction.id);
 
     return NextResponse.json({
       id: predictionRecord.id,
