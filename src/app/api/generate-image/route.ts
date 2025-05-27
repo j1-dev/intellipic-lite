@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Replicate from 'replicate';
 
-export const replicate = new Replicate({
+const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN!,
 });
 
