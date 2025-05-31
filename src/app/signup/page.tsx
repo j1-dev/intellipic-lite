@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { supabase } from '@/utils/supabaseClient';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 
 const SignupPage = () => {
@@ -87,114 +88,116 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-gray-50 px-4">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-background px-4">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold tracking-tight">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             Create an account
           </h1>
-          <p className="text-sm text-gray-500 mt-2">
-            Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 hover:text-blue-500">
-              Sign in
-            </Link>
+          <p className="text-sm text-muted-foreground">
+            Create an account to start generating AI images
           </p>
         </div>
 
-        <div className="bg-white p-8 rounded-lg shadow-sm border">
-          {error && (
-            <div
-              className={`p-3 rounded-md mb-6 ${
-                error.includes('Success')
-                  ? 'bg-green-50 text-green-700 border border-green-200'
-                  : 'bg-red-50 text-red-700 border border-red-200'
-              }`}>
-              {error}
-            </div>
-          )}
-
+        <Card className="p-6">
           <form onSubmit={handleSignup} className="space-y-4">
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="fullName"
-                className="block text-sm font-medium text-gray-700">
+                className="text-sm font-medium text-foreground">
                 Full Name
               </label>
               <Input
                 id="fullName"
                 name="fullName"
                 type="text"
-                autoComplete="name"
-                required
+                placeholder="John Doe"
                 value={formData.fullName}
                 onChange={handleChange}
-                className="mt-1"
-                placeholder="John Doe"
+                disabled={loading}
+                autoComplete="name"
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700">
+                className="text-sm font-medium text-foreground">
                 Email
               </label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                autoComplete="email"
-                required
+                placeholder="name@example.com"
                 value={formData.email}
                 onChange={handleChange}
-                className="mt-1"
-                placeholder="you@example.com"
+                disabled={loading}
+                autoComplete="email"
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700">
+                className="text-sm font-medium text-foreground">
                 Password
               </label>
               <Input
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="new-password"
-                required
+                placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className="mt-1"
-                placeholder="••••••••"
+                disabled={loading}
+                autoComplete="new-password"
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700">
+                className="text-sm font-medium text-foreground">
                 Confirm Password
               </label>
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
-                autoComplete="new-password"
-                required
+                placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="mt-1"
-                placeholder="••••••••"
+                disabled={loading}
+                autoComplete="new-password"
               />
             </div>
 
+            {error && (
+              <p
+                className={`text-sm ${
+                  error.startsWith('Success')
+                    ? 'text-green-500 dark:text-green-400'
+                    : 'text-destructive'
+                }`}>
+                {error}
+              </p>
+            )}
+
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating account...' : 'Sign up'}
+              {loading ? 'Creating account...' : 'Create account'}
             </Button>
           </form>
-        </div>
+        </Card>
+
+        <p className="text-sm text-center text-muted-foreground">
+          Already have an account?{' '}
+          <Link
+            href="/login"
+            className="font-medium text-primary hover:text-primary/90 transition-colors">
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   );

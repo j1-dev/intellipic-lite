@@ -1,6 +1,7 @@
 'use client';
 
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from 'next-themes';
 import { Navbar } from '@/components/Navbar';
 
 export default function ClientLayout({
@@ -9,9 +10,17 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      <Navbar />
-      <main className="min-h-screen bg-gray-50">{children}</main>
-    </AuthProvider>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange>
+      <AuthProvider>
+        <Navbar />
+        <main className="min-h-screen bg-background transition-colors">
+          {children}
+        </main>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

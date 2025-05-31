@@ -3,9 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import Image from 'next/image';
 import {
   Select,
   SelectContent,
@@ -13,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import Image from 'next/image';
 import { supabase } from '@/utils/supabaseClient';
 
 interface ImageGeneration {
@@ -33,30 +33,44 @@ export default function Dashboard() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [images, setImages] = useState<ImageGeneration[]>([]);
   const [error, setError] = useState('');
+  const [credits, setCredits] = useState<number | null>(null);
   const [currentGeneration, setCurrentGeneration] =
     useState<ImageGeneration | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch images when component mounts
+  // Fetch images and credits when component mounts
   useEffect(() => {
-    const fetchImages = async () => {
+    const fetchData = async () => {
       if (!user?.id) return;
 
-      const { data, error } = await supabase
+      // Fetch images
+      const { data: imagesData, error: imagesError } = await supabase
         .from('images')
         .select('*')
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching images:', error);
-        setError('Failed to load your images');
+      if (imagesError) {
+        console.error('Error fetching images:', imagesError);
       } else {
-        setImages(data || []);
+        setImages(imagesData || []);
+      }
+
+      // Fetch credits
+      const { data: creditsData, error: creditsError } = await supabase
+        .from('credits')
+        .select('amount')
+        .eq('user_id', user?.id)
+        .single();
+
+      if (creditsError) {
+        console.error('Error fetching credits:', creditsError);
+      } else {
+        setCredits(creditsData?.amount || 0);
       }
     };
 
-    fetchImages();
+    fetchData();
 
     // Set up polling for status updates if there's an active generation
     const pollInterval = setInterval(async () => {
@@ -91,7 +105,7 @@ export default function Dashboard() {
             predictionData.status === 'completed' ||
             predictionData.status === 'failed'
           ) {
-            fetchImages();
+            fetchData();
           }
         }
       }
@@ -101,6 +115,14 @@ export default function Dashboard() {
       clearInterval(pollInterval);
     };
   }, [user?.id, currentGeneration]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
 
   const handleGenerateImage = async () => {
     try {
@@ -177,93 +199,101 @@ export default function Dashboard() {
   const StatusDisplay = ({ status }: { status: string }) => {
     const getStatusColor = () => {
       switch (status) {
+        case 'starting':
+          return 'text-blue-500 dark:text-blue-400';
+        case 'processing':
+          return 'text-yellow-500 dark:text-yellow-400';
         case 'completed':
-          return 'text-green-500';
+          return 'text-green-500 dark:text-green-400';
         case 'failed':
-          return 'text-red-500';
+          return 'text-red-500 dark:text-red-400';
         default:
-          return 'text-blue-500';
+          return 'text-gray-500 dark:text-gray-400';
       }
     };
 
     const getStatusText = () => {
       switch (status) {
         case 'starting':
-          return 'Starting generation...';
+          return 'Starting...';
         case 'processing':
-          return 'Generating your image...';
-        case 'completed':
-          return 'Generation complete!';
-        case 'failed':
-          return 'Generation failed';
-        default:
           return 'Processing...';
+        case 'completed':
+          return 'Completed';
+        case 'failed':
+          return 'Failed';
+        default:
+          return 'Unknown';
       }
     };
 
     return (
-      <div className={`flex items-center gap-2 ${getStatusColor()}`}>
-        {status !== 'completed' && status !== 'failed' && (
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
-        )}
-        <span>{getStatusText()}</span>
-      </div>
+      <span className={`font-semibold ${getStatusColor()}`}>
+        {getStatusText()}
+      </span>
     );
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Image Generation Form */}
+      <div className="max-w-4xl mx-auto space-y-8">
+        {/* Generation Form */}
         <Card className="p-6">
-          <h2 className="text-2xl font-bold mb-4">Generate New Image</h2>
-          <div className="space-y-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-foreground">
+              Generate New Image
+            </h2>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">Credits:</span>
+              <span className="font-semibold text-foreground">{credits}</span>
+            </div>
+          </div>
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Reference Image
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Upload Reference Image
               </label>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setSelectedImage(file);
-                    setPreviewUrl(URL.createObjectURL(file));
-                  }
-                }}
-                ref={fileInputRef}
-              />
-              {previewUrl && (
-                <div className="mt-2 relative w-32 h-32">
-                  <Image
-                    src={previewUrl}
-                    alt="Preview"
-                    fill
-                    className="object-cover rounded-lg"
-                  />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 cursor-pointer hover:border-muted-foreground/50 transition-colors">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <div className="text-center">
+                  <div className="text-muted-foreground mb-2">
+                    Click to upload or drag and drop
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    PNG, JPG, GIF up to 10MB
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Prompt</label>
-              <Input
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Prompt
+              </label>
+              <Textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Enter your prompt..."
-                disabled={generating}
+                rows={4}
+                placeholder="Describe how you want to transform your image..."
+                className="resize-none"
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-2">Gender</label>
-              <Select
-                value={gender}
-                onValueChange={setGender}
-                disabled={generating}>
+            <div className="w-48">
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Gender
+              </label>
+              <Select value={gender} onValueChange={setGender}>
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="male">Male</SelectItem>
@@ -272,7 +302,19 @@ export default function Dashboard() {
               </Select>
             </div>
 
-            {error && <div className="text-red-500 text-sm">{error}</div>}
+            {previewUrl && (
+              <div className="mt-4">
+                <Image
+                  src={previewUrl}
+                  alt="Preview"
+                  width={200}
+                  height={200}
+                  className="rounded-lg border border-border"
+                />
+              </div>
+            )}
+
+            {error && <div className="text-destructive text-sm">{error}</div>}
 
             <Button
               onClick={handleGenerateImage}
@@ -283,54 +325,48 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        {/* Current Generation Status */}
-        {currentGeneration ? (
-          <Card className="p-6">
-            <h3 className="text-xl font-semibold mb-4">Current Generation</h3>
-            <div className="space-y-4">
-              <StatusDisplay status={currentGeneration.status} />
-              {currentGeneration.url && (
-                <div className="relative w-full h-64">
-                  <Image
-                    src={currentGeneration.url}
-                    alt={currentGeneration.prompt}
-                    fill
-                    className="object-cover rounded-lg"
-                  />
-                </div>
-              )}
-              <p className="text-sm text-gray-600">
-                Prompt: {currentGeneration.prompt}
-              </p>
-            </div>
-          </Card>
-        ) : (
-          <Card className="p-6 flex items-center justify-center text-gray-500">
-            <p>No active generation</p>
-          </Card>
-        )}
-      </div>
+        {/* Generated Images */}
+        <div className="space-y-6">
+          <h2 className="text-2xl font-bold text-foreground">
+            Your Generated Images
+          </h2>
 
-      {/* Generated Images Gallery */}
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-4">Your Generated Images</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {images.map((image) => (
-            <Card key={image.id} className="p-4">
-              <div className="relative w-full h-64 mb-4">
-                <Image
-                  src={image.url}
-                  alt={image.prompt}
-                  fill
-                  className="object-cover rounded-lg"
-                />
+          {currentGeneration && (
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-semibold text-foreground">
+                  Current Generation
+                </h3>
+                <StatusDisplay status={currentGeneration.status} />
               </div>
-              <p className="text-sm text-gray-600 truncate">{image.prompt}</p>
-              <p className="text-xs text-gray-400">
-                {new Date(image.created_at).toLocaleDateString()}
+              <p className="text-sm text-muted-foreground mb-2">
+                {currentGeneration.prompt}
               </p>
             </Card>
-          ))}
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {images.map((image) => (
+              <Card key={image.id} className="p-4">
+                {image.url ? (
+                  <div className="aspect-square relative mb-3">
+                    <Image
+                      src={image.url}
+                      alt={image.prompt}
+                      fill
+                      className="rounded-lg object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-square bg-muted rounded-lg mb-3" />
+                )}
+                <p className="text-sm text-muted-foreground mb-2">
+                  {image.prompt}
+                </p>
+                <StatusDisplay status={image.status} />
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 // List of paths that don't require authentication
 export const publicPaths = [
   '/api/replicate-webhook/:predictionId*',
+  '/api/stripe-webhook',
   '/api/auth',
   '/login',
   '/signup',

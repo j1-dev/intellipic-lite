@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-[calc(100vh-4rem)] bg-gradient-to-b from-white to-blue-50">
+    <div className="flex flex-col min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background to-blue-50 dark:from-background dark:to-blue-950/30">
       <main className="flex-1">
         <div className="container mx-auto px-4 py-20 sm:px-6 lg:px-8">
           {/* Hero Section */}
@@ -13,7 +13,7 @@ export default function Home() {
               Create amazing{' '}
               <span className="block mt-2">AI-generated images</span>
             </h1>
-            <p className="mt-6 text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Transform your ideas into stunning visuals with our AI image
               generation platform. Perfect for creating unique artwork,
               visualizing concepts, or just having fun!
@@ -30,7 +30,7 @@ export default function Home() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="text-lg px-8 py-6 hover:bg-gray-50 transition-all duration-200 hover:scale-105">
+                  className="text-lg px-8 py-6 hover:bg-muted transition-all duration-200 hover:scale-105">
                   Sign In
                 </Button>
               </Link>
@@ -39,7 +39,7 @@ export default function Home() {
 
           {/* Image Section */}
           <div className="max-w-5xl mx-auto mb-32">
-            <div className="relative overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-300">
+            <div className="relative overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-300 rounded-xl">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 mix-blend-overlay"></div>
               <Image
                 src="/intellipic-lite.png"
@@ -58,7 +58,7 @@ export default function Home() {
               Why Choose IntelliPic Lite?
             </h2>
             <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-              <div className="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="group bg-card p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div className="rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -82,7 +82,7 @@ export default function Home() {
                   technology. No waiting, just instant creativity.
                 </p>
               </div>
-              <div className="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="group bg-card p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div className="rounded-xl bg-gradient-to-br from-green-100 to-green-200 p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -106,7 +106,7 @@ export default function Home() {
                   realistic. Perfect for any project.
                 </p>
               </div>
-              <div className="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="group bg-card p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 <div className="rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
