@@ -36,13 +36,13 @@ export async function POST(request: NextRequest) {
 
     // If the prediction succeeded, add the output URL
     if (status === 'succeeded' && output) {
-      updateData.output_urls = [output];
+      updateData.output_urls = [output[0]];
       updateData.completed_at =
         webhookData.completed_at || new Date().toISOString();
 
       // Also store in images table for the gallery
       const { error: imageError } = await supabase.from('images').insert({
-        url: output,
+        url: output[0],
         user_id: (
           await supabase
             .from('predictions')

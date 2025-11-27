@@ -38,7 +38,6 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const prompt = formData.get('prompt') as string;
     const imageFile = formData.get('image') as File;
-    const gender = (formData.get('gender') as string) || 'male';
 
     // Validate input
     if (!prompt || !imageFile) {
@@ -141,12 +140,10 @@ export async function POST(request: NextRequest) {
       console.log('Webhook URL:', webhookUrl);
 
       const prediction = await replicate.predictions.create({
-        version: 'easel/ai-avatars',
+        version: 'bytedance/seedream-4',
         input: {
-          face_image: imageDataUrl,
-          user_gender: gender,
+          image_input: [imageDataUrl],
           prompt: prompt,
-          workflow_type: 'Realistic',
         },
         webhook: webhookUrl,
         webhook_events_filter: ['completed'],

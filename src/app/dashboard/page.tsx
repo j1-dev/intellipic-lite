@@ -4,13 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { supabase } from '@/utils/supabaseClient';
@@ -27,7 +20,6 @@ interface ImageGeneration {
 export default function Dashboard() {
   const { user } = useAuth();
   const [prompt, setPrompt] = useState('');
-  const [gender, setGender] = useState('male');
   const [generating, setGenerating] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -137,7 +129,6 @@ export default function Dashboard() {
       const formData = new FormData();
       formData.append('image', selectedImage); // Changed from 'file' to 'image' to match API expectation
       formData.append('prompt', prompt);
-      formData.append('gender', gender);
 
       // Get the current session from Supabase
       const {
@@ -287,20 +278,6 @@ export default function Dashboard() {
               />
             </div>
 
-            <div className="w-48">
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Gender
-              </label>
-              <Select value={gender} onValueChange={setGender}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select gender" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
             {previewUrl && (
               <div className="mt-4">
