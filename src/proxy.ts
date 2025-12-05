@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 import { createClient } from '@/utils/supabase/middleware';
 import { isPublicPath } from '@/app/api/config';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   try {
     // Create Supabase client with request context
     const { supabase, response } = createClient(request);

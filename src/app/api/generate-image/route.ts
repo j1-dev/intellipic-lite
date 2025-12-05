@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
       console.log('Webhook URL:', webhookUrl);
 
       const prediction = await replicate.predictions.create({
-        version: 'bytedance/seedream-4',
+        version: 'bytedance/seedream-4.5',
         input: {
           image_input: [imageDataUrl],
           prompt: prompt,
