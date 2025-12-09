@@ -11,19 +11,19 @@ const CREDIT_PACKAGES = [
   {
     id: '10_credits' as CreditPackage,
     credits: 10,
-    price: '$9.99',
+    price: '1€',
     popular: false,
   },
   {
     id: '25_credits' as CreditPackage,
     credits: 25,
-    price: '$19.99',
+    price: '2€',
     popular: true,
   },
   {
     id: '50_credits' as CreditPackage,
     credits: 50,
-    price: '$34.99',
+    price: '3.5€',
     popular: false,
   },
 ];
@@ -116,10 +116,10 @@ export default function CreditsPage() {
                   {pkg.price}
                 </p>
                 <p className="text-muted-foreground mb-6">
-                  $
-                  {(Number(pkg.price.replace('$', '')) / pkg.credits).toFixed(
+                  
+                  {(Number(pkg.price.replace('€', '')) / pkg.credits).toFixed(
                     2
-                  )}{' '}
+                  )}€ {' '}
                   per credit
                 </p>
                 <Button
