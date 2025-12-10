@@ -230,7 +230,7 @@ export default function Dashboard() {
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Generation Form */}
         <Card className="p-6">
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-foreground">
               Generate New Image
             </h2>
@@ -242,26 +242,43 @@ export default function Dashboard() {
           <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Upload Reference Image
+                {previewUrl ? 'Reference Image' : 'Upload Reference Image'}
               </label>
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 cursor-pointer hover:border-muted-foreground/50 transition-colors">
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <div className="text-center">
-                  <div className="text-muted-foreground mb-2">
-                    Click to upload or drag and drop
+              <div>
+                {previewUrl ? (
+                  <div className="mt-4 inline-flex">
+                    <Image
+                      src={previewUrl}
+                      alt="Preview"
+                      width={200}
+                      height={200}
+                      className="rounded-lg border border-border"
+                    />
+                    <Button variant="destructive" className="ml-3" onClick={() => setPreviewUrl(null)}>
+                      X
+                    </Button>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    PNG, JPG, GIF up to 10MB
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 cursor-pointer hover:border-muted-foreground/50 transition-colors">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageChange}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <div className="text-center">
+                      <div className="text-muted-foreground mb-2">
+                        Click to upload or drag and drop
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        PNG, JPG, GIF up to 10MB
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -277,19 +294,6 @@ export default function Dashboard() {
                 className="resize-none"
               />
             </div>
-
-
-            {previewUrl && (
-              <div className="mt-4">
-                <Image
-                  src={previewUrl}
-                  alt="Preview"
-                  width={200}
-                  height={200}
-                  className="rounded-lg border border-border"
-                />
-              </div>
-            )}
 
             {error && <div className="text-destructive text-sm">{error}</div>}
 
