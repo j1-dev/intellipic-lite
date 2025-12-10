@@ -9,20 +9,21 @@ export default function Home() {
         <div className="container mx-auto px-4 py-20 sm:px-6 lg:px-8">
           {/* Hero Section */}
           <div className="text-center max-w-4xl mx-auto mb-20">
-            <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 h-40">
+            <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl bg-clip-text text-foreground h-40">
               Create amazing{' '}
               <span className="block mt-2">AI-generated images</span>
             </h1>
             <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Transform your ideas into stunning visuals with our AI image
-              generation platform. Perfect for creating unique artwork,
-              visualizing concepts, or just having fun!
+              The most user friendly way of creating AI images thanks to the
+              power of SeedDream. Create stunning images in any style
+              imaginable, edit portraits and even change facial expressions with
+              just one prompt. Joins us now, and get 5 free credits!
             </p>
             <div className="mt-10 flex justify-center gap-6">
               <Link href="/signup">
                 <Button
                   size="lg"
-                  className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all duration-200 bg-gradient-to-r from-blue-600 to-purple-600 hover:scale-105">
+                  className="text-lg px-8 py-6 transition-all duration-200 cursor-pointer">
                   Get Started Free
                 </Button>
               </Link>
@@ -30,7 +31,7 @@ export default function Home() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className="text-lg px-8 py-6 hover:bg-muted transition-all duration-200 hover:scale-105">
+                  className="text-lg px-8 py-6 hover:bg-muted transition-all duration-200 cursor-pointer">
                   Sign In
                 </Button>
               </Link>
@@ -38,7 +39,7 @@ export default function Home() {
           </div>
 
           {/* Image Section */}
-          <div className="max-w-5xl mx-auto mb-32">
+          <div className="max-w-5xl mx-auto mb-16">
             <div className="relative overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform duration-300 rounded-xl">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 mix-blend-overlay"></div>
               <Image
@@ -54,11 +55,11 @@ export default function Home() {
 
           {/* Features Section */}
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-16 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-              Why Choose IntelliPic Lite?
+            <h2 className="text-3xl font-bold text-center mb-16 bg-clip-text text-foreground">
+              Why Choose IntelliPic-Lite?
             </h2>
             <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-              <div className="group bg-card p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <div className="group bg-card p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1">
                 <div className="rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -74,58 +75,58 @@ export default function Home() {
                     />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold mb-4 text-gray-900">
+                <h3 className="text-2xl font-bold mb-4 text-foreground flex">
                   Lightning Fast
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-muted-foreground leading-relaxed">
                   Generate stunning images in seconds with our advanced AI
                   technology. No waiting, just instant creativity.
                 </p>
               </div>
-              <div className="group bg-card p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div className="rounded-xl bg-gradient-to-br from-green-100 to-green-200 p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8 text-green-600"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-gray-900">
-                  High Quality
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
+              <div className="group bg-card p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1">
+                  <div className="rounded-xl bg-gradient-to-br from-green-100 to-green-200 p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-8 w-8 text-green-600"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 text-foreground flex">
+                    High Quality
+                  </h3>
+                <p className="text-muted-foreground leading-relaxed">
                   Create high-resolution images that look professional and
                   realistic. Perfect for any project.
                 </p>
               </div>
-              <div className="group bg-card p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                <div className="rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-8 w-8 text-purple-600"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4 text-gray-900">
-                  Endless Possibilities
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
+              <div className="group bg-card p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1">
+                  <div className="rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 p-4 w-16 h-16 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-8 w-8 text-purple-600"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4 text-foreground flex">
+                    Endless Possibilities
+                  </h3>
+                <p className="text-muted-foreground leading-relaxed">
                   Create any type of image you can imagine with simple text
                   prompts. Let your creativity run wild.
                 </p>

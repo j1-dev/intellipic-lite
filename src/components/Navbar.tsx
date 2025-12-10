@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import Image from 'next/image';
+import { Logo } from './Logo';
 
 export function Navbar() {
   const { user, signOut } = useAuth();
@@ -12,12 +12,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <Link href="/" className="text-xl font-bold">
-            <Image
-              src="/icon.png"
-              alt="IntelliPic Lite"
-              width={60}
-              height={60}
-            />
+            <Logo size={42}/>
           </Link>
 
           <div className="flex items-center gap-4">
