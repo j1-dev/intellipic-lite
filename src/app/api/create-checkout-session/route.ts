@@ -4,44 +4,40 @@ import Stripe from 'stripe';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-05-28.basil', // Use the latest API version
+  apiVersion: '2025-12-15.clover',
 });
 
-const CREDIT_PRICES = { // Real prices
-  '10_credits': {
-    priceId: 'price_1RUua8IsZGNqsWfQ4bnBtFR8', 
-    credits: 10,
-    displayPrice: '$1',
-  },
-  '25_credits': {
-    priceId: 'price_1RUuaBIsZGNqsWfQ1pFfGpNc', 
-    credits: 25,
-    displayPrice: '$2',
-  },
-  '50_credits': {
-    priceId: 'price_1RUuaEIsZGNqsWfQhJDYOS8C', 
-    credits: 50,
-    displayPrice: '$3.5',
-  },
-} as const;
-
-// const CREDIT_PRICES = {  Test prices
+// const CREDIT_PRICES = {
+//   // Real prices
 //   '10_credits': {
-//     priceId: 'price_1RUuAWIsZGNqsWfQtC1vSbCd', 
+//     priceId: 'price_1Sl85mDFWrNeIm21TtKwdJMM',
 //     credits: 10,
-//     displayPrice: '$9.99',
 //   },
 //   '25_credits': {
-//     priceId: 'price_1RUuAwIsZGNqsWfQeHbG6NuL', 
+//     priceId: 'price_1Sl85YDFWrNeIm21c9aRhnKu',
 //     credits: 25,
-//     displayPrice: '$19.99',
 //   },
 //   '50_credits': {
-//     priceId: 'price_1RUuBJIsZGNqsWfQ4Phz5IiM', 
+//     priceId: 'price_1Sl85UDFWrNeIm21IQfGlmHf',
 //     credits: 50,
-//     displayPrice: '$34.99',
 //   },
 // } as const;
+
+//Test prices
+const CREDIT_PRICES = {
+  '10_credits': {
+    priceId: 'price_1Sl7CyDmQlQs9pmHdyM9Lpi7',
+    credits: 10,
+  },
+  '25_credits': {
+    priceId: 'price_1Sl7DTDmQlQs9pmHRPYXeg6f',
+    credits: 25,
+  },
+  '50_credits': {
+    priceId: 'price_1Sl7E3DmQlQs9pmHZXyoJGq0',
+    credits: 50,
+  },
+} as const;
 
 // Initialize Supabase client with service role for server-side operations
 const supabase = createClient(
