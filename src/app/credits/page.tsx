@@ -85,59 +85,60 @@ export default function CreditsPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Purchase Credits</h1>
-          <p className="text-muted-foreground">
-            You currently have {credits === null ? '...' : credits} credits
-          </p>
-        </div>
+    <div className="h-screen bg-gradient-to-b from-background to-blue-50 dark:from-background dark:to-blue-950/30">
+      <div className="container mx-auto px-4 py-8 ">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold mb-2">Purchase Credits</h1>
+            <p className="text-muted-foreground">
+              You currently have {credits === null ? '...' : credits} credits
+            </p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {CREDIT_PACKAGES.map((pkg) => (
-            <Card
-              key={pkg.id}
-              className={`p-6 relative ${
-                pkg.popular ? 'border-2 border-primary' : ''
-              }`}>
-              {pkg.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm">
-                    Most Popular
-                  </span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {CREDIT_PACKAGES.map((pkg) => (
+              <Card
+                key={pkg.id}
+                className={`p-6 relative ${
+                  pkg.popular ? 'border-2 border-primary' : ''
+                }`}>
+                {pkg.popular && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold mb-2">
+                    {pkg.credits} Credits
+                  </h3>
+                  <p className="text-3xl font-bold text-primary mb-4">
+                    {pkg.price}
+                  </p>
+                  <p className="text-muted-foreground mb-6">
+                    {(Number(pkg.price.replace('€', '')) / pkg.credits).toFixed(
+                      2
+                    )}
+                    € per credit
+                  </p>
+                  <Button
+                    onClick={() => handlePurchase(pkg.id)}
+                    className="w-full"
+                    disabled={loading}>
+                    {loading ? 'Processing...' : 'Purchase Credits'}
+                  </Button>
                 </div>
-              )}
-              <div className="text-center">
-                <h3 className="text-2xl font-bold mb-2">
-                  {pkg.credits} Credits
-                </h3>
-                <p className="text-3xl font-bold text-primary mb-4">
-                  {pkg.price}
-                </p>
-                <p className="text-muted-foreground mb-6">
-                  
-                  {(Number(pkg.price.replace('€', '')) / pkg.credits).toFixed(
-                    2
-                  )}€ {' '}
-                  per credit
-                </p>
-                <Button
-                  onClick={() => handlePurchase(pkg.id)}
-                  className="w-full"
-                  disabled={loading}>
-                  {loading ? 'Processing...' : 'Purchase Credits'}
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+              </Card>
+            ))}
+          </div>
 
-        <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>
-            Credits never expire. Each image generation costs 1 credit.
-            Purchases are non-refundable.
-          </p>
+          <div className="mt-8 text-center text-sm text-muted-foreground">
+            <p>
+              Credits never expire. Each image generation costs 1 credit.
+              Purchases are non-refundable.
+            </p>
+          </div>
         </div>
       </div>
     </div>
