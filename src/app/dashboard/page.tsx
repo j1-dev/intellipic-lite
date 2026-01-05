@@ -7,7 +7,6 @@ import Image from 'next/image';
 import { X, Loader2, UploadCloud } from 'lucide-react';
 import { GalleryCard } from '@/components/GalleryCard';
 
-/*  types  */
 interface ImageGeneration {
   id: string;
   url: string;
@@ -21,7 +20,6 @@ export default function Dashboard() {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /* ----- state ----- */
   const [prompt, setPrompt] = useState('');
   const [generating, setGenerating] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -104,7 +102,6 @@ export default function Dashboard() {
     return () => clearInterval(poll);
   }, [user?.id, current]);
 
-  /* ----------  handlers  ---------- */
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -147,8 +144,6 @@ export default function Dashboard() {
     });
     setGenerating(false);
     setPrompt('');
-    // setSelectedFile(null);
-    // setPreviewUrl(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -162,10 +157,8 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-blue-50 dark:from-background dark:to-blue-950/30">
-      {/* sticky bar */}
       <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
         <div className="max-w-5xl mx-auto px-4 py-4 grid grid-cols-1 sm:flex sm:items-center sm:gap-4 gap-3">
-          {/* hidden file input */}
           <input
             ref={fileInputRef}
             type="file"
@@ -174,7 +167,6 @@ export default function Dashboard() {
             className="hidden"
           />
 
-          {/* row 1 : upload + prompt */}
           <div className="flex items-center gap-3 w-full">
             {!previewUrl ? (
               <button
@@ -211,7 +203,6 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* row 2 : generate + credits */}
           <div className="flex items-center gap-3 sm:ml-auto">
             <button
               onClick={onGenerate}
@@ -232,7 +223,6 @@ export default function Dashboard() {
         )}
       </header>
 
-      {/* current job toast */}
       {current && (
         <div className="max-w-5xl mx-auto px-4 mt-4">
           <div className="flex items-center justify-between bg-card border rounded-xl p-3 shadow-sm">
@@ -253,7 +243,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* gallery */}
       <main className="max-w-5xl mx-auto px-4 py-6">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {images.map((img) => (
@@ -263,7 +252,7 @@ export default function Dashboard() {
 
         {images.length === 0 && !current && (
           <div className="text-center py-20 text-muted-foreground">
-            No images yet—upload a picture and create your first edit!
+            No images yet - upload a picture and create your first edit!
           </div>
         )}
 
@@ -271,7 +260,7 @@ export default function Dashboard() {
           <div className="max-w-5xl mx-auto mt-8">
             <div className="flex items-center justify-between bg-yellow-500/10 border border-yellow-500/30 text-yellow-700 dark:text-yellow-300 rounded-lg px-4 py-2 text-sm">
               <span>
-                Images expire after 1h — download the ones you want to keep!
+                Images expire after 1h - download the ones you want to keep!
               </span>
               <button
                 onClick={() => setShowExpiryBanner(false)}
