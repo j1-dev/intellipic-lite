@@ -52,7 +52,23 @@ export default function Dashboard() {
         .single();
       if (!err && data) setCredits(data.amount);
     };
+
+    const deleteDeadLinks = async () => {
+      const TTL_MS = 60 * 60 * 1000; // 1 hour
+      const cutOff = new Date(Date.now() - TTL_MS).toISOString();
+      if (!user?.id) return;
+      const { error } = await supabase
+        .from('images')
+        .delete()
+        .eq('user_id', user.id)
+        .lt('created_at', cutOff);
+      if (error) {
+        console.error('Purge failed: ', error);
+        return;
+      }
+    };
     if (!user?.id) return;
+    deleteDeadLinks();
     fetchImages();
     fetchCredits();
 
@@ -255,7 +271,7 @@ export default function Dashboard() {
           <div className="max-w-5xl mx-auto mt-8">
             <div className="flex items-center justify-between bg-yellow-500/10 border border-yellow-500/30 text-yellow-700 dark:text-yellow-300 rounded-lg px-4 py-2 text-sm">
               <span>
-                Images expire after 24 h—download the ones you want to keep!
+                Images expire after 1h — download the ones you want to keep!
               </span>
               <button
                 onClick={() => setShowExpiryBanner(false)}
