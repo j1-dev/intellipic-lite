@@ -6,6 +6,7 @@ import { supabase } from '@/utils/supabaseClient';
 import Image from 'next/image';
 import { X, Loader2, UploadCloud } from 'lucide-react';
 import { GalleryCard } from '@/components/GalleryCard';
+import RunningJob from '@/components/RunningJob';
 
 interface ImageGeneration {
   id: string;
@@ -147,14 +148,6 @@ export default function Dashboard() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  /* ----------  UI  ---------- */
-  const statusColour = (s: string) =>
-    s === 'completed'
-      ? 'bg-green-500/10 text-green-400'
-      : s === 'failed'
-      ? 'bg-red-500/10 text-red-400'
-      : 'bg-blue-500/10 text-blue-400';
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-blue-50 dark:from-background dark:to-blue-950/30">
       <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
@@ -223,25 +216,7 @@ export default function Dashboard() {
         )}
       </header>
 
-      {current && (
-        <div className="max-w-5xl mx-auto px-4 mt-4">
-          <div className="flex items-center justify-between bg-card border rounded-xl p-3 shadow-sm">
-            <div className="flex items-center gap-3">
-              <span
-                className={`px-2 py-1 rounded text-xs font-medium ${statusColour(
-                  current.status
-                )}`}>
-                {current.status}
-              </span>
-              <p className="text-sm text-muted-foreground">{current.prompt}</p>
-            </div>
-            {(current.status === 'processing' ||
-              current.status === 'starting') && (
-              <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-            )}
-          </div>
-        </div>
-      )}
+      {current && <RunningJob current={current} />}
 
       <main className="max-w-5xl mx-auto px-4 py-6">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
